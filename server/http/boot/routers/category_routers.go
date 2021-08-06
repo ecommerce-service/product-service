@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/ecommerce-service/product-service/server/http/handlers"
+	"github.com/ecommerce-service/product-service/server/http/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,9 +20,10 @@ func NewCategoryRouters(routeGroup fiber.Router, handler handlers.HandlerContrac
 
 func (r CategoryRouters) RegisterRouter() {
 	handler := handlers.NewCategoryHandler(r.Handler)
-	//jwt := middlewares.NewJwtMiddleware(r.Handler.UseCaseContract)
+	jwt := middlewares.NewJwtMiddleware(r.Handler.UseCaseContract)
 
 	categoryRouters := r.RouteGroup.Group("/category")
+	categoryRouters.Use(jwt.Use)
 	categoryRouters.Get("", handler.GetListWithPagination)
 	categoryRouters.Get("/all", handler.GetAll)
 	categoryRouters.Get("/:id", handler.GetByID)
