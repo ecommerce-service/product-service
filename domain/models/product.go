@@ -12,6 +12,7 @@ type Product struct {
 	sku           string
 	price         float64
 	discount      sql.NullFloat64
+	stock         int
 	mainImageKey  sql.NullString
 	createdAt     time.Time
 	updatedAt     time.Time
@@ -85,6 +86,16 @@ func (model *Product) SetDiscount(discount float64) *Product {
 	return model
 }
 
+func (model *Product) Stock() int {
+	return model.stock
+}
+
+func (model *Product) SetStock(stock int) *Product {
+	model.stock = stock
+
+	return model
+}
+
 func (model *Product) MainImageKey() sql.NullString {
 	return model.mainImageKey
 }
@@ -134,11 +145,11 @@ func (model *Product) SetProductImages(productImages sql.NullString) {
 }
 
 const (
-	ProductSelectStatement = `SELECT p.id,p.category_id,p.name,p.sku,p.price,p.discount,p.main_image_key,p.created_at,p.updated_at,` +
+	ProductSelectStatement = `SELECT p.id,p.category_id,p.name,p.sku,p.price,p.discount,p.stock,p.main_image_key,p.created_at,p.updated_at,` +
 		`c.name FROM products p`
-	ProductDetailSelectStatement = `SELECT p.id,p.category_id,p.name,p.sku,p.price,p.discount,p.main_image_key,p.created_at,p.updated_at,` +
+	ProductDetailSelectStatement = `SELECT p.id,p.category_id,p.name,p.sku,p.price,p.discount,p.stock,p.main_image_key,p.created_at,p.updated_at,` +
 		`c.name,ARRAY_TO_STRING(ARRAY_AGG(pi.image_key),',') FROM products p`
-	ProductSelectCountStatement =`SELECT COUNT(DISTINCT p.id) FROM products p`
+	ProductSelectCountStatement      = `SELECT COUNT(DISTINCT p.id) FROM products p`
 	ProductJoinSelectStatement       = `INNER JOIN categories c ON c.id=p.category_id AND c.deleted_at IS NULL `
 	ProductJoinDetailSelectStatement = `LEFT JOIN product_images pi ON pi.product_id=p.id`
 	ProductDefaultWhereStatement     = `WHERE p.deleted_at IS NULL`
@@ -147,7 +158,7 @@ const (
 
 func (model *Product) ScanRows(rows *sql.Rows) (interface{}, error) {
 	model.Category = NewCategoryModel()
-	err := rows.Scan(&model.id, &model.categoryId, &model.name, &model.sku, &model.price, &model.discount, &model.mainImageKey, &model.createdAt, &model.updatedAt, &model.Category.name)
+	err := rows.Scan(&model.id, &model.categoryId, &model.name, &model.sku, &model.price, &model.discount, &model.stock, &model.mainImageKey, &model.createdAt, &model.updatedAt, &model.Category.name)
 	if err != nil {
 		return model, err
 	}
@@ -157,7 +168,7 @@ func (model *Product) ScanRows(rows *sql.Rows) (interface{}, error) {
 
 func (model *Product) ScanRow(row *sql.Row) (interface{}, error) {
 	model.Category = NewCategoryModel()
-	err := row.Scan(&model.id, &model.categoryId, &model.name, &model.sku, &model.price, &model.discount, &model.mainImageKey, &model.createdAt, &model.updatedAt, &model.Category.name,
+	err := row.Scan(&model.id, &model.categoryId, &model.name, &model.sku, &model.price, &model.discount, &model.stock, &model.mainImageKey, &model.createdAt, &model.updatedAt, &model.Category.name,
 		&model.productImages)
 	if err != nil {
 		return model, err
