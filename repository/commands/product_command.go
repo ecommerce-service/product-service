@@ -21,7 +21,7 @@ func NewProductCommand(db postgresql.IConnection, model *models.Product) command
 func (c ProductCommand) Add() (res string, err error) {
 	statement := `INSERT INTO products(category_id,name,sku,price,discount,stock,main_image_key,created_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`
 
-	err = c.db.GetTx().QueryRow(statement, c.model.CategoryId(), c.model.Name(), c.model.Sku(), c.model.Price(), c.model.Discount(), c.model.Stock().Float64, c.model.MainImageKey().String,
+	err = c.db.GetTx().QueryRow(statement, c.model.CategoryId(), c.model.Name(), c.model.Sku(), c.model.Price(), c.model.Discount().Float64, c.model.Stock(), c.model.MainImageKey().String,
 		c.model.CreatedAt(), c.model.UpdatedAt()).Scan(&res)
 	if err != nil {
 		return res, err
